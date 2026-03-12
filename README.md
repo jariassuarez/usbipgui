@@ -565,6 +565,52 @@ The `executor.py` module handles running USBIP commands with:
 4. Add API routes in `routers/`
 5. Create HTML templates in `templates/`
 
+## Web GUI API Reference
+
+The application runs on `http://0.0.0.0:8080` by default. All endpoints return HTML fragments (intended for HTMX partial-page updates) unless stated otherwise.
+
+### Pages
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/` | Dashboard / home page |
+| `GET` | `/server` | Server management page |
+| `GET` | `/client` | Client management page |
+
+### Server Endpoints (`/server`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/server/status` | Get USBIP daemon status |
+| `POST` | `/server/daemon/start` | Start the USBIP daemon |
+| `POST` | `/server/daemon/stop` | Stop the USBIP daemon |
+| `GET` | `/server/devices` | List USB devices available for sharing |
+| `POST` | `/server/devices/{busid}/bind` | Bind (share) a USB device |
+| `POST` | `/server/devices/{busid}/unbind` | Unbind (stop sharing) a USB device |
+
+**Path parameters:**
+- `busid` — Bus ID of the USB device (e.g. `1-2`, `3-1.2`)
+
+### Client Endpoints (`/client`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/client/module/load` | Load the `vhci-hcd` kernel module |
+| `GET` | `/client/list?host={host}` | List devices exported by a remote USBIP server |
+| `POST` | `/client/attach` | Attach a remote USB device |
+| `POST` | `/client/detach` | Detach an attached USB device |
+| `GET` | `/client/ports` | List currently attached ports |
+
+**Query parameters:**
+- `host` — IP address or hostname of the remote USBIP server
+
+**Form parameters for `/client/attach`:**
+- `host` — Remote server address
+- `busid` — Bus ID of the device to attach
+
+**Form parameters for `/client/detach`:**
+- `port` — Local virtual port number to detach
+
 ## Documentation & Resources
 
 ### USBIP Documentation
