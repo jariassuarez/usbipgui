@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 import services.server_service as svc
@@ -23,32 +23,22 @@ async def get_status(request: Request):
     )
 
 
-@router.post("/daemon/start", response_class=HTMLResponse)
+@router.post("/daemon/start")
 async def start_daemon(request: Request):
     try:
-        status = await svc.start(usbip_port=settings.usbip_port)
-        error = None
-    except Exception as exc:
-        status = None
-        error = str(exc)
-    return templates.TemplateResponse(
-        "server/_daemon_status.html",
-        {"request": request, "status": status, "error": error},
-    )
+        await svc.start(usbip_port=settings.usbip_port)
+    except Exception:
+        pass
+    return RedirectResponse(url="/server/status", status_code=303)
 
 
-@router.post("/daemon/stop", response_class=HTMLResponse)
+@router.post("/daemon/stop")
 async def stop_daemon(request: Request):
     try:
-        status = await svc.stop()
-        error = None
-    except Exception as exc:
-        status = None
-        error = str(exc)
-    return templates.TemplateResponse(
-        "server/_daemon_status.html",
-        {"request": request, "status": status, "error": error},
-    )
+        await svc.stop()
+    except Exception:
+        pass
+    return RedirectResponse(url="/server/status", status_code=303)
 
 
 @router.get("/devices", response_class=HTMLResponse)

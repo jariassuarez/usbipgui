@@ -8,6 +8,7 @@ A modern web-based graphical interface for managing USBIP (USB over IP) on Linux
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Installation as a Service](#installation-as-a-service)
 - [Configuration](#configuration)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
@@ -118,6 +119,172 @@ pip install -r requirements.txt
 usbip --version
 ```
 
+## Installation as a Service
+
+To run USBIP GUI automatically at startup without requiring manual sudo commands, you can install it as a systemd service. This is the recommended approach for production use.
+
+### Automated Installation
+
+A provided installer script handles all the setup automatically:
+
+```bash
+sudo ./install.sh
+```
+
+The installer will:
+- Create a dedicated `usbipgui` service user with appropriate permissions
+- Install the application to `/opt/usbipgui`
+- Set up a Python virtual environment with dependencies
+- Configure sudoers rules for USBIP commands without password prompts
+- Create and enable a systemd service for automatic startup
+- Set up proper logging to `journalctl`
+
+#### Start the Service
+
+After installation, start the service:
+
+```bash
+sudo systemctl start usbipgui
+```
+
+#### Enable Autostart
+
+The service is automatically enabled for startup. To verify:
+
+```bash
+sudo systemctl is-enabled usbipgui
+# Output: enabled
+```
+
+#### Check Service Status
+
+```bash
+sudo systemctl status usbipgui
+```
+
+#### View Logs
+
+```bash
+# Real-time logs
+sudo journalctl -u usbipgui -f
+
+# Last 50 lines
+sudo journalctl -u usbipgui -n 50
+
+# Since last boot
+sudo journalctl -u usbipgui -b
+```
+
+#### Access the Web Interface
+
+Once the service is running, open your web browser and navigate to:
+
+```
+http://localhost:8080
+```
+
+**Tip**: If port 8080 conflicts with another service, you can specify a custom port by editing the systemd service file:
+
+```bash
+sudo nano /etc/systemd/system/usbipgui.service
+# Change the port in the ExecStart line, then:
+sudo systemctl daemon-reload
+sudo systemctl restart usbipgui
+```
+
+### Manual Service Configuration (Advanced)
+
+If you prefer to set up the service manually, follow these steps:
+
+#### 1. Create Service User
+
+```bash
+sudo useradd -r -s /bin/false -d /var/lib/usbipgui -m usbipgui
+```
+
+#### 2. Configure Sudoers
+
+Create `/etc/sudoers.d/90-usbipgui` with the following content:
+
+```bash
+sudo visudo -f /etc/sudoers.d/90-usbipgui
+```
+
+Add these lines:
+
+```
+# Allow usbipgui service user to run USBIP commands without password
+Defaults:usbipgui !authenticate, !requiretty, !use_pty
+usbipgui ALL=(ALL) NOPASSWD: /usr/bin/usbip
+usbipgui ALL=(ALL) NOPASSWD: /usr/bin/usbipd
+usbipgui ALL=(ALL) NOPASSWD: /usr/lib/linux-tools/*/usbip
+usbipgui ALL=(ALL) NOPASSWD: /usr/lib/linux-tools/*/usbipd
+usbipgui ALL=(ALL) NOPASSWD: /sbin/modprobe
+usbipgui ALL=(ALL) NOPASSWD: /bin/lsmod
+usbipgui ALL=(ALL) NOPASSWD: /usr/bin/pgrep
+usbipgui ALL=(ALL) NOPASSWD: /usr/bin/pkill
+```
+
+#### 3. Create Systemd Service File
+
+Create `/etc/systemd/system/usbipgui.service`:
+
+```ini
+[Unit]
+Description=USBIP GUI - Web Interface for USB over IP
+After=network.target
+
+[Service]
+Type=simple
+User=usbipgui
+Group=usbipgui
+WorkingDirectory=/opt/usbipgui/src
+ExecStart=/opt/usbipgui/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8080
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=usbipgui
+
+[Install]
+WantedBy=multi-user.target
+```
+
+#### 4. Update Service Port (Optional)
+
+If you want to use a custom port (e.g., higher than 40000), modify the ExecStart line in `/etc/systemd/system/usbipgui.service`:
+
+```bash
+ExecStart=/opt/usbipgui/venv/bin/uvicorn main:app --host 0.0.0.0 --port 41000
+```
+
+#### 5. Enable and Start Service
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable usbipgui.service
+sudo systemctl start usbipgui.service
+```
+
+### Uninstallation
+
+To remove the service installation:
+
+```bash
+sudo ./uninstall.sh
+```
+
+Or manually:
+
+```bash
+sudo systemctl stop usbipgui
+sudo systemctl disable usbipgui
+sudo rm /etc/systemd/system/usbipgui.service
+sudo systemctl daemon-reload
+sudo userdel -r usbipgui
+sudo rm -rf /opt/usbipgui
+```
+
 ## Configuration
 
 Configuration is handled via environment variables with the `USBIPGUI_` prefix:
@@ -125,7 +292,7 @@ Configuration is handled via environment variables with the `USBIPGUI_` prefix:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `USBIPGUI_HOST` | `0.0.0.0` | Web server bind address |
-| `USBIPGUI_PORT` | `8000` | Web server port |
+| `USBIPGUI_PORT` | `8080` | Web server port |
 | `USBIPGUI_USBIP_PORT` | `3240` | USBIP daemon port |
 | `USBIPGUI_USE_SUDO` | `true` | Use sudo for USBIP commands |
 | `USBIPGUI_LOG_LEVEL` | `info` | Logging level (debug, info, warning, error) |
@@ -170,7 +337,7 @@ username ALL=(ALL) NOPASSWD: /usr/bin/pkill
 
 ```bash
 cd src
-uvicorn main:app --host 0.0.0.0 --port 8000
+uvicorn main:app --host 0.0.0.0 --port 8080
 ```
 
 #### Using Environmental Variables
@@ -184,8 +351,10 @@ USBIPGUI_HOST=127.0.0.1 USBIPGUI_PORT=8080 ./run.sh
 Once running, open your web browser and navigate to:
 
 ```
-http://localhost:8000
+http://localhost:8080
 ```
+
+**Note**: If port 8080 is already in use, you can specify a different port using the `USBIPGUI_PORT` environment variable. For systems where lower ports are restricted, it's recommended to use ports higher than 40000 (e.g., 41000, 42000).
 
 ### USBIP Server Setup (Manual/Reference)
 

@@ -14,7 +14,10 @@ BASE_DIR = Path(__file__).parent
 
 app = FastAPI(title="USBIP GUI", version="1.0.0")
 
-app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+# Mount static files if directory exists
+static_dir = BASE_DIR / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 app.include_router(pages.router)
 app.include_router(server.router)

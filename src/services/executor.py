@@ -4,7 +4,9 @@ from dataclasses import dataclass
 from config import settings
 
 # Commands that do not need sudo even when use_sudo is enabled
-_NO_SUDO = frozenset({"pgrep", "pkill", "lsmod", "cat", "ls"})
+# Note: pgrep is read-only and doesn't need sudo
+# pkill MUST use sudo to kill system processes, so it's removed from this list
+_NO_SUDO = frozenset({"pgrep", "lsmod", "cat", "ls"})
 
 
 @dataclass
