@@ -59,20 +59,28 @@ USB communication is tunneled over TCP/IP, maintaining compatibility with standa
 ## Requirements
 
 - **Operating System**: Linux (USBIP is Linux-specific)
-- **Kernels**: Linux 4.7+ (USBIP support in mainline kernel)
-- **USBIP Command-line Tools**: `usbip` package must be installed
-  ```bash
-  # Ubuntu/Debian
-  sudo apt install usbip
-
-  # Fedora/RHEL
-  sudo dnf install usbip
-
-  # Arch
-  sudo pacman -S usbip
-  ```
+- **USBIP Command-line Tools**: Provided by `linux-tools` package
 - **Python**: 3.10 or higher
 - **Privileges**: Must run with root access or sudo privileges for USBIP operations
+
+### Installing USBIP Tools
+
+**Note**: The standalone `usbip` package is deprecated since kernel 3.17. USBIP tools are now provided by the kernel's `linux-tools` package.
+
+#### Uninstall Deprecated Packages (if previously installed)
+
+```bash
+sudo apt-get remove --purge usbip* libusbip*
+```
+
+#### Install linux-tools
+
+**Ubuntu/Debian**:
+```bash
+sudo apt-get install linux-tools-generic
+```
+
+This single package provides all necessary USBIP tools integrated with your kernel version.
 
 ### Python Dependencies
 
@@ -179,18 +187,133 @@ Once running, open your web browser and navigate to:
 http://localhost:8000
 ```
 
-### Server Operations
+### USBIP Server Setup (Manual/Reference)
 
-1. Navigate to the **Server** tab
-2. View the daemon status and connected devices
-3. Monitor device sharing status
+The server is the computer that has the real USB device physically attached to it.
 
-### Client Operations
+#### 1. Load the USBIP Kernel Module
 
-1. Navigate to the **Client** tab
-2. Enter the remote USBIP server details
-3. Browse and attach remote USB devices
-4. View attached ports and connection status
+```bash
+sudo modprobe usbip_host
+```
+
+#### 2. Start the USBIP Daemon
+
+```bash
+sudo /usr/lib/linux-tools/$(uname -r)/usbipd &
+```
+
+Or on some systems (Fedora/RHEL):
+
+```bash
+sudo /usr/lib/modules/$(uname -r)/kernel/drivers/usb/usbip/usbipd &
+```
+
+#### 3. List All Connected USB Devices
+
+```bash
+/usr/lib/linux-tools/$(uname -r)/usbip list -l
+```
+
+**Example Output:**
+
+```
+ - busid 1-10 (04f2:b446)
+   Chicony Electronics Co., Ltd : unknown product (04f2:b446)
+
+ - busid 1-2.2 (045e:071d)
+   Microsoft Corp. : unknown product (045e:071d)
+
+ - busid 1-2.4 (046d:c52b)
+   Logitech, Inc. : Unifying Receiver (046d:c52b)
+
+ - busid 1-3 (0458:706e)
+   KYE Systems Corp. (Mouse Systems) : unknown product (0458:706e)
+```
+
+#### 4. Bind a Device to Share
+
+Select the device you want to share using its bus ID:
+
+```bash
+sudo /usr/lib/linux-tools/$(uname -r)/usbip bind -b <bus_id>
+```
+
+**Example**: To share the device with bus ID `1-3`:
+
+```bash
+sudo /usr/lib/linux-tools/$(uname -r)/usbip bind -b 1-3
+```
+
+The device is now ready to be accessed from client computers!
+
+### USBIP Client Setup (Manual/Reference)
+
+Access USB devices from a remote USBIP server on the same network.
+
+#### 1. Load the Virtual Host Controller Interface (VHCI) Driver
+
+```bash
+sudo modprobe vhci-hcd
+```
+
+#### 2. List Devices Available from the Server
+
+```bash
+/usr/lib/linux-tools/$(uname -r)/usbip list -r <server_ip>
+```
+
+**Example** (accessing server at 10.251.101.16):
+
+```bash
+/usr/lib/linux-tools/$(uname -r)/usbip list -r 10.251.101.16
+```
+
+**Example Output:**
+
+```
+Exportable USB devices
+======================
+ - 10.251.101.16
+        1-3: KYE Systems Corp. (Mouse Systems) : unknown product (0458:706e)
+           : /sys/devices/pci0000:00/0000:00:14.0/usb1/1-3
+           : Miscellaneous Device / ? / Interface Association (ef/02/01)
+```
+
+#### 3. Attach a Remote Device
+
+```bash
+sudo /usr/lib/linux-tools/$(uname -r)/usbip attach -r <server_ip> -b <bus_id>
+```
+
+**Example**: Attach device `1-3` from server `10.251.101.16`:
+
+```bash
+sudo /usr/lib/linux-tools/$(uname -r)/usbip attach -r 10.251.101.16 -b 1-3
+```
+
+The device is now available on your client computer and can be used as if it were physically connected. For example:
+
+```bash
+# Example: Access a webcam
+gst-launch-1.0 v4l2src device=/dev/video0 ! fakesink -v
+
+# Example: Check device status
+lsusb
+```
+
+### Using USBIP GUI for Server/Client Management
+
+1. Navigate to the **Server** tab to:
+   - View daemon status and loaded kernel modules
+   - List available USB devices with detailed information
+   - Monitor device sharing status
+
+2. Navigate to the **Client** tab to:
+   - Connect to remote USBIP servers
+   - Browse and attach remote USB devices
+   - View attached ports and connection status
+   - Monitor virtual host controller interface (VHCI) status
 
 ## Project Structure
 
