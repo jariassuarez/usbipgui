@@ -154,6 +154,8 @@ else
 Defaults:usbipgui !authenticate, !requiretty, !use_pty
 usbipgui ALL=(ALL) NOPASSWD: /usr/bin/usbip
 usbipgui ALL=(ALL) NOPASSWD: /usr/bin/usbipd
+usbipgui ALL=(ALL) NOPASSWD: /usr/sbin/usbip
+usbipgui ALL=(ALL) NOPASSWD: /usr/sbin/usbipd
 usbipgui ALL=(ALL) NOPASSWD: /usr/lib/linux-tools/*/usbip
 usbipgui ALL=(ALL) NOPASSWD: /usr/lib/linux-tools/*/usbipd
 usbipgui ALL=(ALL) NOPASSWD: /sbin/modprobe
