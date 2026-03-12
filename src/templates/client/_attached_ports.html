@@ -1,0 +1,46 @@
+{% if error %}
+<div class="bg-red-900/40 border border-red-700 text-red-300 rounded px-3 py-2 text-sm mb-3">
+  {{ error }}
+</div>
+{% endif %}
+
+{% if not attached %}
+<p class="text-slate-500 text-sm">No devices currently attached.</p>
+{% else %}
+<div class="overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="text-left text-slate-400 border-b border-slate-700">
+        <th class="pb-2 pr-4 font-medium">Port</th>
+        <th class="pb-2 pr-4 font-medium">Remote Host</th>
+        <th class="pb-2 pr-4 font-medium">Bus ID</th>
+        <th class="pb-2 pr-4 font-medium">ID</th>
+        <th class="pb-2 pr-4 font-medium">Speed</th>
+        <th class="pb-2 text-right font-medium">Action</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-700/50">
+      {% for port in attached %}
+      <tr class="hover:bg-slate-700/30 transition-colors">
+        <td class="py-2.5 pr-4 font-mono text-blue-300">{{ "%02d" | format(port.port) }}</td>
+        <td class="py-2.5 pr-4 text-slate-300">{{ port.remote_host }}</td>
+        <td class="py-2.5 pr-4 font-mono text-slate-300">{{ port.remote_busid }}</td>
+        <td class="py-2.5 pr-4 font-mono text-slate-500">{{ port.vendor_id }}:{{ port.product_id }}</td>
+        <td class="py-2.5 pr-4 text-slate-400 text-xs">{{ port.speed }}</td>
+        <td class="py-2.5 text-right">
+          <form hx-post="/client/detach"
+                hx-target="#attached-ports"
+                hx-swap="innerHTML">
+            <input type="hidden" name="port" value="{{ port.port }}" />
+            <button type="submit"
+                    class="text-xs bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded transition-colors">
+              Detach
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}

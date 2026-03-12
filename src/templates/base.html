@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}USBIP GUI{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { DEFAULT: "#3b82f6", dark: "#1d4ed8" }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full bg-slate-900 text-slate-100 font-sans">
+
+  <nav class="bg-slate-800 border-b border-slate-700">
+    <div class="max-w-5xl mx-auto px-4 flex items-center gap-6 h-14">
+      <span class="text-blue-400 font-semibold tracking-wide text-lg">USBIP GUI</span>
+      <a href="/server"
+         class="text-sm px-3 py-1 rounded {% if active_tab == 'server' %}bg-blue-600 text-white{% else %}text-slate-400 hover:text-slate-100{% endif %}">
+        Server
+      </a>
+      <a href="/client"
+         class="text-sm px-3 py-1 rounded {% if active_tab == 'client' %}bg-blue-600 text-white{% else %}text-slate-400 hover:text-slate-100{% endif %}">
+        Client
+      </a>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-4 py-8">
+    {% block content %}{% endblock %}
+  </main>
+
+</body>
+</html>

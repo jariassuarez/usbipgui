@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% set active_tab = "server" %}
+{% block title %}Server — USBIP GUI{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <h2 class="text-xl font-semibold text-slate-100">Server Mode</h2>
+
+  {% if error %}
+  <div class="bg-red-900/40 border border-red-700 text-red-300 rounded-lg px-4 py-3 text-sm">
+    {{ error }}
+  </div>
+  {% endif %}
+
+  <!-- Daemon status section; HTMX loads it immediately and after actions -->
+  <section class="bg-slate-800 border border-slate-700 rounded-lg p-5 space-y-4">
+    <h3 class="font-medium text-slate-200">Service Status</h3>
+    <div id="daemon-status"
+         hx-get="/server/status"
+         hx-trigger="load"
+         hx-swap="innerHTML">
+      {% if status %}
+        {% include "server/_daemon_status.html" %}
+      {% else %}
+        <span class="text-slate-500 text-sm">Loading…</span>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- Device list section -->
+  <section class="bg-slate-800 border border-slate-700 rounded-lg p-5 space-y-4">
+    <div class="flex items-center justify-between">
+      <h3 class="font-medium text-slate-200">Local USB Devices</h3>
+      <button class="text-xs text-slate-400 hover:text-slate-200 border border-slate-600 px-3 py-1 rounded transition-colors"
+              hx-get="/server/devices"
+              hx-target="#device-list"
+              hx-swap="innerHTML">
+        Refresh
+      </button>
+    </div>
+    <div id="device-list"
+         hx-get="/server/devices"
+         hx-trigger="load"
+         hx-swap="innerHTML">
+      {% if devices is defined %}
+        {% include "server/_device_list.html" %}
+      {% else %}
+        <span class="text-slate-500 text-sm">Loading…</span>
+      {% endif %}
+    </div>
+  </section>
+
+</div>
+{% endblock %}

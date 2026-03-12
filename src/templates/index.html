@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}USBIP GUI{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-[60vh] gap-8">
+  <h1 class="text-3xl font-bold text-slate-100">USB/IP Web Interface</h1>
+  <p class="text-slate-400 text-center max-w-md">
+    Manage USB device sharing over IP. Run as <strong>Server</strong> to export
+    local devices, or as <strong>Client</strong> to attach remote devices.
+  </p>
+  <div class="flex gap-4">
+    <a href="/server"
+       class="px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition-colors">
+      Server Mode
+    </a>
+    <a href="/client"
+       class="px-8 py-4 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-semibold transition-colors">
+      Client Mode
+    </a>
+  </div>
+</div>
+{% endblock %}

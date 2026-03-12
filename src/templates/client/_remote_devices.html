@@ -1,0 +1,59 @@
+{% if error %}
+<div class="bg-red-900/40 border border-red-700 text-red-300 rounded px-3 py-2 text-sm mb-3">
+  {{ error }}
+</div>
+{% endif %}
+
+{% if oob_refresh_ports and attached is defined %}
+<!-- Out-of-band swap to refresh the attached ports section after an attach action -->
+<div id="attached-ports" hx-swap-oob="innerHTML">
+  {% include "client/_attached_ports.html" %}
+</div>
+{% endif %}
+
+{% if not devices %}
+<p class="text-slate-500 text-sm">
+  {% if error %}Could not retrieve devices.{% else %}No exportable devices found on <strong class="text-slate-300">{{ host }}</strong>.{% endif %}
+</p>
+{% else %}
+<p class="text-xs text-slate-500 mb-3">Showing devices exported by <strong class="text-slate-400">{{ host }}</strong></p>
+<div class="overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="text-left text-slate-400 border-b border-slate-700">
+        <th class="pb-2 pr-4 font-medium">Bus ID</th>
+        <th class="pb-2 pr-4 font-medium">Vendor / Product</th>
+        <th class="pb-2 font-medium">ID</th>
+        <th class="pb-2 text-right font-medium">Action</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-700/50">
+      {% for device in devices %}
+      <tr class="hover:bg-slate-700/30 transition-colors">
+        <td class="py-2.5 pr-4 font-mono text-blue-300">{{ device.busid }}</td>
+        <td class="py-2.5 pr-4 text-slate-300">
+          <span class="text-slate-200">{{ device.vendor_name }}</span>
+          <span class="text-slate-500"> / </span>
+          <span>{{ device.product_name }}</span>
+        </td>
+        <td class="py-2.5 pr-4 font-mono text-slate-500">
+          {{ device.vendor_id }}:{{ device.product_id }}
+        </td>
+        <td class="py-2.5 text-right">
+          <form hx-post="/client/attach"
+                hx-target="#remote-devices"
+                hx-swap="innerHTML">
+            <input type="hidden" name="host" value="{{ host }}" />
+            <input type="hidden" name="busid" value="{{ device.busid }}" />
+            <button type="submit"
+                    class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition-colors">
+              Attach
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}

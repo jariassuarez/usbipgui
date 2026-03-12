@@ -1,0 +1,50 @@
+{% if error %}
+<div class="bg-red-900/40 border border-red-700 text-red-300 rounded px-3 py-2 text-sm mb-3">
+  {{ error }}
+</div>
+{% endif %}
+
+<div class="flex flex-wrap items-center gap-4">
+
+  <!-- Module badge -->
+  <div class="flex items-center gap-2 text-sm">
+    <span class="text-slate-400">usbip_host:</span>
+    {% if status and status.host_module_loaded %}
+      <span class="bg-green-900/50 text-green-400 border border-green-700 px-2 py-0.5 rounded text-xs font-medium">loaded</span>
+    {% else %}
+      <span class="bg-slate-700 text-slate-400 border border-slate-600 px-2 py-0.5 rounded text-xs font-medium">not loaded</span>
+    {% endif %}
+  </div>
+
+  <!-- Daemon badge -->
+  <div class="flex items-center gap-2 text-sm">
+    <span class="text-slate-400">usbipd:</span>
+    {% if status and status.is_running %}
+      <span class="bg-green-900/50 text-green-400 border border-green-700 px-2 py-0.5 rounded text-xs font-medium">
+        running{% if status.pid %} (pid {{ status.pid }}){% endif %}
+      </span>
+    {% else %}
+      <span class="bg-slate-700 text-slate-400 border border-slate-600 px-2 py-0.5 rounded text-xs font-medium">stopped</span>
+    {% endif %}
+  </div>
+
+  <!-- Action buttons -->
+  <div class="flex gap-2 ml-auto">
+    {% if not status or not status.is_running %}
+    <button class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded transition-colors"
+            hx-post="/server/daemon/start"
+            hx-target="#daemon-status"
+            hx-swap="innerHTML">
+      Start Service
+    </button>
+    {% else %}
+    <button class="text-sm bg-red-700 hover:bg-red-800 text-white px-4 py-1.5 rounded transition-colors"
+            hx-post="/server/daemon/stop"
+            hx-target="#daemon-status"
+            hx-swap="innerHTML">
+      Stop Service
+    </button>
+    {% endif %}
+  </div>
+
+</div>
