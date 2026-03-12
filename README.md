@@ -569,29 +569,14 @@ The `executor.py` module handles running USBIP commands with:
 
 ### USBIP Documentation
 
-- **Official Linux Kernel Documentation**: https://www.kernel.org/doc/html/latest/usb/usbip.html
+- **Official Linux Kernel Documentation**: https://www.kernel.org/doc/html/latest/usb/usbip_protocol.html
 - **USBIP GitHub Repository**: https://github.com/torvalds/linux/tree/master/tools/usb/usbip
 - **Man Pages**:
   - `man usbip` - USBIP command reference
-  - `man usbip-server` - Server-side operations
-  - `man usbip-client` - Client-side operations
-
-### Related Resources
-
-- **Linux USB Project**: https://www.linux-usb.org/
-- **Kernel Modules**: https://wiki.archlinux.org/title/USBIP
-- **Network USB**: https://en.wikipedia.org/wiki/USBIP
-
-### FastAPI & Dependencies
-
-- **FastAPI Documentation**: https://fastapi.tiangolo.com/
-- **Uvicorn Documentation**: https://www.uvicorn.org/
-- **Jinja2 Documentation**: https://jinja.palletsprojects.com/
-- **Pydantic Documentation**: https://docs.pydantic.dev/
 
 ## License
 
-[Add your license information here]
+This project is licensed under the [GNU General Public License v3.0](LICENSE).
 
 ## Contributing
 
