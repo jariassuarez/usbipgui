@@ -359,6 +359,18 @@ http://localhost:8080
 
 **Note**: If port 8080 is already in use, you can specify a different port using the `USBIPGUI_PORT` environment variable. For systems where lower ports are restricted, it's recommended to use ports higher than 40000 (e.g., 41000, 42000).
 
+## Interface Overview
+
+### Server Dashboard
+![Server Dashboard](images/server_screenshot.png)
+
+The server dashboard displays connected USB devices, their sharing status, and system information.
+
+### Client Dashboard
+![Client Dashboard](images/client_screenshot.png)
+
+The client dashboard allows you to browse remote devices and manage connections.
+
 ### USBIP Server Setup (Manual/Reference)
 
 The server is the computer that has the real USB device physically attached to it.
