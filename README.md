@@ -96,7 +96,7 @@ This single package provides all necessary USBIP tools integrated with your kern
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/usbipgui.git
+git clone https://github.com/jariassuarez/usbipgui.git
 cd usbipgui
 ```
 

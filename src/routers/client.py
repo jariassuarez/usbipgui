@@ -49,12 +49,12 @@ async def attach(
     except Exception as exc:
         error = str(exc)
 
-    # Refresh remote device list after attach
+    # Refresh remote device list after attach; device may no longer be listed
+    # (it was just claimed), so don't treat an empty/failed refresh as an error
     try:
         devices = await svc.list_remote(host)
-    except Exception as exc:
+    except Exception:
         devices = []
-        error = error or str(exc)
 
     # Refresh attached ports for OOB swap
     try:
